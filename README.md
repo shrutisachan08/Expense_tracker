@@ -128,16 +128,15 @@ The goal was to deliver a **clean, correct, and extensible foundation**.
 
 ## Project Structure
 Expense_tracker/
-│
-├── backend/
-│ ├── src/
-│ ├── database.sqlite
-│ └── package.json
-│
-├── frontend/
-│ ├── src/
-│ ├── public/
-│ └── package.json
+  backend/
+   src/
+  database.sqlite
+  package.json
+
+frontend/
+  src/
+  public/
+  package.json
 
 
 ---
