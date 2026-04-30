@@ -1,7 +1,7 @@
 import { useEffect, useState } from "react";
 import "./App.css";
 
-const API = process.env.REACT_APP_API_URL + "/expenses";;
+const API = process.env.REACT_APP_API_URL + "/expenses";
 
 function App() {
   const [expenses, setExpenses] = useState([]);
@@ -19,34 +19,34 @@ function App() {
 
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState("");
-  const fetchExpenses = async () => {
-    try {
-      setLoading(true);
-      setError("");
-
-      let url = API;
-      const params = [];
-
-      if (filter) params.push(`category=${filter}`);
-      if (sort) params.push(`sort=${sort}`);
-
-      if (params.length) {
-        url += "?" + params.join("&");
-      }
-
-      const res = await fetch(url);
-      const data = await res.json();
-
-      setExpenses(data.expenses || data);
-      setTotal(data.total || 0);
-    } catch (err) {
-      setError("Failed to fetch expenses");
-    } finally {
-      setLoading(false);
-    }
-  };
-  // eslint-disable-next-line react-hooks/exhaustive-deps
   useEffect(() => {
+    const fetchExpenses = async () => {
+      try {
+        setLoading(true);
+        setError("");
+
+        let url = API;
+        const params = [];
+
+        if (filter) params.push(`category=${filter}`);
+        if (sort) params.push(`sort=${sort}`);
+
+        if (params.length) {
+          url += "?" + params.join("&");
+        }
+
+        const res = await fetch(url);
+        const data = await res.json();
+
+        setExpenses(data.expenses || data);
+        setTotal(data.total || 0);
+      } catch (err) {
+        setError("Failed to fetch expenses");
+      } finally {
+        setLoading(false);
+      }
+    };
+
     fetchExpenses();
   }, [filter, sort]);
 
@@ -99,8 +99,12 @@ function App() {
         description: "",
         date: ""
       });
+      
+      const res = await fetch(API);
+      const data = await res.json();
+      setExpenses(data.expenses || data);
+      setTotal(data.total || 0);
 
-      fetchExpenses();
     } catch (err) {
       setError("Failed to add expense. Try again.");
     } finally {
@@ -111,10 +115,7 @@ function App() {
   const categorySummary = expenses.reduce((acc, curr) => {
     const cat = curr.category;
 
-    if (!acc[cat]) {
-      acc[cat] = 0;
-    }
-
+    if (!acc[cat]) acc[cat] = 0;
     acc[cat] += curr.amount;
 
     return acc;
