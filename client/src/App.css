@@ -89,3 +89,10 @@
 .error {
   color: red;
 }
+
+.summary {
+  margin-top: 15px;
+  padding: 10px;
+  background: #f9f9f9;
+  border-radius: 8px;
+}
