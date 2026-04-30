@@ -1,4 +1,5 @@
 import { useEffect, useState } from "react";
+import "./App.css";
 
 const API = "http://localhost:5000/expenses";
 
@@ -89,99 +90,107 @@ function App() {
   };
 
   return (
-    <div style={{ padding: "20px", fontFamily: "Arial" }}>
-      <h2>Expense Tracker</h2>
+  <div className="container">
+    <h2 className="title">💰 Expense Tracker</h2>
 
-      {/* ERROR */}
-      {error && <p style={{ color: "red" }}>{error}</p>}
+    {error && <p className="error">{error}</p>}
 
-      {/* FORM */}
-      <form onSubmit={handleSubmit}>
+    {/* FORM */}
+    <div className="card">
+      <form onSubmit={handleSubmit} className="form">
+
         <input
+          className="input"
           placeholder="Amount"
           value={form.amount}
           onChange={(e) => setForm({ ...form, amount: e.target.value })}
         />
 
         <input
+          className="input"
           placeholder="Category"
           value={form.category}
           onChange={(e) => setForm({ ...form, category: e.target.value })}
         />
 
         <input
+          className="input"
           placeholder="Description"
           value={form.description}
-          onChange={(e) =>
-            setForm({ ...form, description: e.target.value })
-          }
+          onChange={(e) => setForm({ ...form, description: e.target.value })}
         />
 
         <input
+          className="input"
           type="date"
           value={form.date}
           onChange={(e) => setForm({ ...form, date: e.target.value })}
         />
 
         <button
+          className="button"
           type="submit"
           disabled={!form.amount || !form.category || !form.date || loading}
         >
           {loading ? "Adding..." : "Add"}
         </button>
       </form>
-
-      {/* FILTER + SORT */}
-      <div style={{ marginTop: "20px" }}>
-        <input
-          placeholder="Filter by category"
-          value={filter}
-          onChange={(e) => setFilter(e.target.value)}
-        />
-
-        <button onClick={() => setSort("date_desc")}>
-          Sort by Date ↓
-        </button>
-
-        <button onClick={() => setFilter("")}>
-          Clear Filter
-        </button>
-      </div>
-
-      {/* TOTAL */}
-      <h3>Total: ₹{total}</h3>
-
-      {/* LOADING */}
-      {loading && <p>Loading...</p>}
-
-      {/* EMPTY STATE */}
-      {!loading && expenses.length === 0 && <p>No expenses found</p>}
-
-      {/* TABLE */}
-      {!loading && expenses.length > 0 && (
-        <table border="1" cellPadding="8">
-          <thead>
-            <tr>
-              <th>Amount</th>
-              <th>Category</th>
-              <th>Description</th>
-              <th>Date</th>
-            </tr>
-          </thead>
-          <tbody>
-            {expenses.map((e) => (
-              <tr key={e.id}>
-                <td>₹{e.amount}</td>
-                <td>{e.category}</td>
-                <td>{e.description}</td>
-                <td>{e.date}</td>
-              </tr>
-            ))}
-          </tbody>
-        </table>
-      )}
     </div>
-  );
+
+    {/* CONTROLS */}
+    <div className="controls">
+      <input
+        className="input"
+        placeholder="Filter by category"
+        value={filter}
+        onChange={(e) => setFilter(e.target.value)}
+      />
+
+      <button
+        className="btn-secondary"
+        onClick={() => setSort("date_desc")}
+      >
+        ⬇ Sort
+      </button>
+
+      <button
+        className="btn-secondary"
+        onClick={() => setFilter("")}
+      >
+        Clear
+      </button>
+    </div>
+
+    <h3>Total: ₹{total}</h3>
+
+    {loading && <p>Loading...</p>}
+    {!loading && expenses.length === 0 && <p>No expenses found</p>}
+
+    {/* TABLE */}
+    {!loading && expenses.length > 0 && (
+      <table className="table">
+        <thead>
+          <tr>
+            <th>Amount</th>
+            <th>Category</th>
+            <th>Description</th>
+            <th>Date</th>
+          </tr>
+        </thead>
+        <tbody>
+          {expenses.map((e) => (
+            <tr key={e.id}>
+              <td>₹{e.amount}</td>
+              <td>{e.category}</td>
+              <td>{e.description}</td>
+              <td>{e.date}</td>
+            </tr>
+          ))}
+        </tbody>
+      </table>
+    )}
+  </div>
+);
 }
 
 export default App;
