@@ -5,31 +5,45 @@ const API = "http://localhost:5000/expenses";
 function App() {
   const [expenses, setExpenses] = useState([]);
   const [total, setTotal] = useState(0);
+
   const [form, setForm] = useState({
     amount: "",
     category: "",
     description: "",
     date: ""
   });
+
   const [filter, setFilter] = useState("");
   const [sort, setSort] = useState("");
 
+  const [loading, setLoading] = useState(false);
+  const [error, setError] = useState("");
+
   const fetchExpenses = async () => {
-    let url = API;
-    const params = [];
+    try {
+      setLoading(true);
+      setError("");
 
-    if (filter) params.push(`category=${filter}`);
-    if (sort) params.push(`sort=${sort}`);
+      let url = API;
+      const params = [];
 
-    if (params.length) {
-      url += "?" + params.join("&");
+      if (filter) params.push(`category=${filter}`);
+      if (sort) params.push(`sort=${sort}`);
+
+      if (params.length) {
+        url += "?" + params.join("&");
+      }
+
+      const res = await fetch(url);
+      const data = await res.json();
+
+      setExpenses(data.expenses || data);
+      setTotal(data.total || 0);
+    } catch (err) {
+      setError("Failed to fetch expenses");
+    } finally {
+      setLoading(false);
     }
-
-    const res = await fetch(url);
-    const data = await res.json();
-
-    setExpenses(data.expenses || data);
-    setTotal(data.total || 0);
   };
 
   useEffect(() => {
@@ -39,30 +53,47 @@ function App() {
   const handleSubmit = async (e) => {
     e.preventDefault();
 
-    const key = Date.now().toString(); // idempotency key
+    if (form.amount <= 0) {
+      setError("Amount must be positive");
+      return;
+    }
 
-    await fetch(API, {
-      method: "POST",
-      headers: {
-        "Content-Type": "application/json",
-        "Idempotency-Key": key
-      },
-      body: JSON.stringify(form)
-    });
+    setLoading(true);
+    setError("");
 
-    setForm({
-      amount: "",
-      category: "",
-      description: "",
-      date: ""
-    });
+    try {
+      const key = crypto.randomUUID();
 
-    fetchExpenses();
+      await fetch(API, {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+          "Idempotency-Key": key
+        },
+        body: JSON.stringify(form)
+      });
+
+      setForm({
+        amount: "",
+        category: "",
+        description: "",
+        date: ""
+      });
+
+      fetchExpenses();
+    } catch (err) {
+      setError("Failed to add expense. Try again.");
+    } finally {
+      setLoading(false);
+    }
   };
 
   return (
     <div style={{ padding: "20px", fontFamily: "Arial" }}>
       <h2>Expense Tracker</h2>
+
+      {/* ERROR */}
+      {error && <p style={{ color: "red" }}>{error}</p>}
 
       {/* FORM */}
       <form onSubmit={handleSubmit}>
@@ -71,11 +102,13 @@ function App() {
           value={form.amount}
           onChange={(e) => setForm({ ...form, amount: e.target.value })}
         />
+
         <input
           placeholder="Category"
           value={form.category}
           onChange={(e) => setForm({ ...form, category: e.target.value })}
         />
+
         <input
           placeholder="Description"
           value={form.description}
@@ -83,12 +116,19 @@ function App() {
             setForm({ ...form, description: e.target.value })
           }
         />
+
         <input
           type="date"
           value={form.date}
           onChange={(e) => setForm({ ...form, date: e.target.value })}
         />
-        <button type="submit">Add</button>
+
+        <button
+          type="submit"
+          disabled={!form.amount || !form.category || !form.date || loading}
+        >
+          {loading ? "Adding..." : "Add"}
+        </button>
       </form>
 
       {/* FILTER + SORT */}
@@ -102,32 +142,44 @@ function App() {
         <button onClick={() => setSort("date_desc")}>
           Sort by Date ↓
         </button>
+
+        <button onClick={() => setFilter("")}>
+          Clear Filter
+        </button>
       </div>
 
       {/* TOTAL */}
       <h3>Total: ₹{total}</h3>
 
-      {/* LIST */}
-      <table border="1" cellPadding="8">
-        <thead>
-          <tr>
-            <th>Amount</th>
-            <th>Category</th>
-            <th>Description</th>
-            <th>Date</th>
-          </tr>
-        </thead>
-        <tbody>
-          {expenses.map((e) => (
-            <tr key={e.id}>
-              <td>₹{e.amount}</td>
-              <td>{e.category}</td>
-              <td>{e.description}</td>
-              <td>{e.date}</td>
+      {/* LOADING */}
+      {loading && <p>Loading...</p>}
+
+      {/* EMPTY STATE */}
+      {!loading && expenses.length === 0 && <p>No expenses found</p>}
+
+      {/* TABLE */}
+      {!loading && expenses.length > 0 && (
+        <table border="1" cellPadding="8">
+          <thead>
+            <tr>
+              <th>Amount</th>
+              <th>Category</th>
+              <th>Description</th>
+              <th>Date</th>
             </tr>
-          ))}
-        </tbody>
-      </table>
+          </thead>
+          <tbody>
+            {expenses.map((e) => (
+              <tr key={e.id}>
+                <td>₹{e.amount}</td>
+                <td>{e.category}</td>
+                <td>{e.description}</td>
+                <td>{e.date}</td>
+              </tr>
+            ))}
+          </tbody>
+        </table>
+      )}
     </div>
   );
 }
