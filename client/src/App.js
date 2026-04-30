@@ -1,7 +1,7 @@
 import { useEffect, useState } from "react";
 import "./App.css";
 
-const API = "http://localhost:5000/expenses";
+const API = process.env.REACT_APP_API_URL + "/expenses";;
 
 function App() {
   const [expenses, setExpenses] = useState([]);
@@ -195,7 +195,7 @@ function App() {
 
       {/* TOTAL */}
       <h3>Total: ₹{total}</h3>
-      
+
       <div className="summary">
         <h3>Summary by Category</h3>
         <ul>
